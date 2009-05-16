@@ -1,0 +1,47 @@
+#!/bin/sh
+
+growl_notify () {
+	growlnotify -m "$1" -n irssi ${opt_sticky:+--sticky} ${opt_title:+"$opt_title"}
+}
+
+libnotify_notify () {
+	notify-send ${opt_timeout:+-t $opt_timeout} "${opt_title}" "$1"
+}
+
+while [ $# -gt 0 ]; do
+	case $1 in
+		(--sticky|-S)	opt_sticky=1
+				;;
+		(--title|-T)	shift
+				opt_title=$1
+				;;
+		(--timeout|-t)	shift
+				opt_timeout=$1
+				;;
+		(--)		shift
+				break
+				;;
+
+		(--*)		echo "ERROR: Unknown option: $1" >&2
+				exit 2
+				;;
+
+		(*)		break
+				;;
+	esac
+
+	shift
+done
+
+set | grep opt_
+
+message="$*"
+
+case $(uname -s) in
+	(Darwin)	growl_notify "$message"
+			;;
+
+	(Linux)		libnotify_notify "$message"
+			;;
+esac
+
