@@ -1,11 +1,14 @@
 #!/bin/sh
 
 growl_notify () {
-	growlnotify -m "$1" -n irssi ${opt_sticky:+--sticky} ${opt_title:+"$opt_title"}
+	growlnotify -m "$1" -n irssi ${opt_sticky:+--sticky} \
+		${opt_icon:+-i $opt_icon} \
+		${opt_title:+"$opt_title"}
 }
 
 libnotify_notify () {
-	notify-send ${opt_timeout:+-t $opt_timeout} "${opt_title}" "$1"
+	notify-send ${opt_timeout:+-t $opt_timeout} \
+		${opt_icon:+-i $opt_icon} "${opt_title}" "$1"
 }
 
 while [ $# -gt 0 ]; do
@@ -17,6 +20,9 @@ while [ $# -gt 0 ]; do
 				;;
 		(--timeout|-t)	shift
 				opt_timeout=$1
+				;;
+		(--icon|-i)	shift
+				opt_icon=$1
 				;;
 		(--)		shift
 				break

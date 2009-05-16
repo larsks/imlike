@@ -21,17 +21,22 @@ $VERSION = '1.0';
 );
 
 sub notify {
-	my ($msg, $timeout) = @_;
+	my ($msg, $title, $timeout) = @_;
 
-	my @cmd = (settings_get_str("$IRSSI{name}_notify_send"));
+	my @cmd = (settings_get_str("$IRSSI{name}_notify_path"));
+
+	if ($title) {
+		push @cmd, '--title';
+		push @cmd, $title
+	}
 
 	if (settings_get_str("$IRSSI{name}_icon_path")) {
-		push @cmd, '-i';
+		push @cmd, '--icon';
 		push @cmd, settings_get_str("$IRSSI{name}_icon_path");
 	}
 
 	if ($timeout) {
-		push @cmd, '-t';
+		push @cmd, '--timeout';
 		push @cmd, $timeout;
 	}
 
@@ -47,7 +52,7 @@ sub handle_query_created {
 	my $query = shift;
 	my $auto = shift;
 
-	notify("New query with $query->{name}",
+	notify("New query with $query->{name}", "$query->{name}",
 		settings_get_int("$IRSSI{name}_query_notification_timeout"));
 }
 
@@ -55,10 +60,10 @@ sub handle_nick_mode_changed {
 	my ($channel, $nick, $mode, $type) = @_;
 
 	if ($type eq "-") {
-		notify("$nick has become idle.",
+		notify("$nick has become idle.", "$nick",
 			settings_get_int("$IRSSI{name}_mode_notification_timeout"));
 	} else {
-		notify("$nick is no longer idle.",
+		notify("$nick is no longer idle.", "$nick",
 			settings_get_int("$IRSSI{name}_mode_notification_timeout"));
 	}
 }
@@ -93,7 +98,7 @@ signal_add('query created', \&handle_query_created);
 signal_add('event mode', \&handle_event_mode);
 
 settings_add_bool($IRSSI{'name'}, "$IRSSI{name}_debug", 0);
-settings_add_str($IRSSI{'name'}, "$IRSSI{name}_notify_send", 'notify-send');
+settings_add_str($IRSSI{'name'}, "$IRSSI{name}_notify_path", 'irssi-notify');
 settings_add_str($IRSSI{'name'}, "$IRSSI{name}_icon_path", '');
 settings_add_int($IRSSI{'name'}, "$IRSSI{name}_mode_notification_timeout", 0);
 settings_add_int($IRSSI{'name'}, "$IRSSI{name}_query_notification_timeout", 0);
