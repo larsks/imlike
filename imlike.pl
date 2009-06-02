@@ -20,10 +20,29 @@ $VERSION = '1.0';
 	changed     => 'recently',
 );
 
+sub tilde_subst {
+	my $path = shift @_;
+	return $path unless $path =~ /~/;
+
+	$path =~ s{
+		^ ~             # find a leading tilde
+		(               # save this in $1
+			[^/]        # a non-slash character
+			*     # repeated 0 or more times (0 means me)
+		)
+	}{
+		$1
+		? (getpwnam($1))[7]
+		: ( $ENV{HOME} || $ENV{LOGDIR} )
+	}ex;
+
+	return $path;
+}
+
 sub notify {
 	my ($msg, $title, $timeout) = @_;
 
-	my @cmd = (settings_get_str("$IRSSI{name}_notify_path"));
+	my @cmd = (tilde_subst(settings_get_str("$IRSSI{name}_notify_path")));
 
 	if ($title) {
 		push @cmd, '--title';
@@ -89,11 +108,6 @@ sub handle_event_mode {
 	}
 }
 
-sub handle_message_joined {
-	Irssi::print(Dumper(\@_));
-}
-
-#signal_add('message joined', \&handle_message_joined);
 signal_add('query created', \&handle_query_created);
 signal_add('event mode', \&handle_event_mode);
 

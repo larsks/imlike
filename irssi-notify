@@ -28,7 +28,7 @@ while [ $# -gt 0 ]; do
 				break
 				;;
 
-		(-*)		echo "ERROR: Unknown option: $1" >&2
+		(--*)		echo "ERROR: Unknown option: $1" >&2
 				exit 2
 				;;
 
